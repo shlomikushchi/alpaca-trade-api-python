@@ -7,6 +7,7 @@ from .common import get_base_url, get_credentials
 from .entity import Account, Entity
 from . import polygon
 import logging
+import socket
 
 
 class StreamConn(object):
@@ -94,7 +95,7 @@ class StreamConn(object):
                 if self._streams:
                     await self.subscribe(self._streams)
                 break
-            except websockets.WebSocketException as wse:
+            except (websockets.WebSocketException, socket.gaierror) as wse:
                 logging.warn(wse)
                 self._ws = None
                 self._retries += 1
@@ -158,7 +159,7 @@ class StreamConn(object):
         try:
             loop.run_until_complete(self.subscribe(initial_channels))
             loop.run_forever()
-        except KeyboardInterrupt:
+        except:
             logging.info("Exiting on Interrupt")
         finally:
             loop.run_until_complete(self.close())
