@@ -33,7 +33,7 @@ class REST(object):
         resp.raise_for_status()
         return resp.json()
 
-    def get(self, path, params=None, version='v2'):
+    def get(self, path, params=None, version='v1'):
         return self._request('GET', path, params=params, version=version)
 
     def exchanges(self):
@@ -110,41 +110,45 @@ class REST(object):
 
         return QuotesV2(raw)
 
-    def historic_agg(self, size, symbol,
-                     _from=None, to=None, limit=None):
-        path = '/historic/agg/{}/{}'.format(size, symbol)
-        params = {}
-        if _from is not None:
-            params['from'] = _from
-        if to is not None:
-            params['to'] = to
-        if limit is not None:
-            params['limit'] = limit
-        raw = self.get(path, params)
-
-        return Aggs(raw)
-
     def historic_agg_v2(self, symbol, multiplier, timespan, _from, to,
                         unadjusted=False, limit=None):
         """
 
         :param symbol:
-        :param multiplier: Size of the timespan multiplier (distance between samples.
-               e.g if 1 we get for daily 2015-01-05, 2015-01-06, 2015-01-07, 2015-01-08
-                   if 3 we get           2015-01-01, 2015-01-04, 2015-01-07, 2015-01-10)
-        :param timespan: Size of the time window: minute, hour, day, week, month, quarter, year
-        :param _from:
+        :param multiplier: Size of the timespan multiplier (distance between
+               samples. e.g if it's 1 we get for daily 2015-01-05, 2015-01-06,
+                            2015-01-07, 2015-01-08.
+                            if it's 3 we get 2015-01-01, 2015-01-04,
+                            2015-01-07, 2015-01-10)
+        :param timespan: Size of the time window: minute, hour, day, week,
+               month, quarter, year
+        :param _from: some use isoformat some use timestamp. for now we
+                      handle both.
+                      examples of different usages: pylivetrader,
+                      alpaca-backtrader.
         :param to:
         :param unadjusted:
         :param limit: max samples to retrieve (seems like we get "limit - 1" )
         :return:
         """
-        path = '/aggs/ticker/{symbol}/range/{multiplier}/{timespan}/{_from}/{to}'.format(symbol=symbol,
-                                                                                         multiplier=multiplier,
-                                                                                         timespan=timespan,
-                                                                                         _from=dateutil.parser.parse(_from).date().isoformat(),
-                                                                                         to=dateutil.parser.parse(to).date().isoformat()
-        )
+        path_template = '/aggs/ticker/{symbol}/range/{multiplier}/' \
+                        '{timespan}/{_from}/{to}'
+        if isinstance(_from, int):
+            path = path_template.format(symbol=symbol,
+                                        multiplier=multiplier,
+                                        timespan=timespan,
+                                        _from=_from,
+                                        to=to
+                                        )
+        else:
+            path = path_template.format(symbol=symbol,
+                                        multiplier=multiplier,
+                                        timespan=timespan,
+                                        _from=dateutil.parser.parse(
+                                            _from).date().isoformat(),
+                                        to=dateutil.parser.parse(
+                                            to).date().isoformat()
+                                        )
         params = {'unadjusted': unadjusted}
         if limit:
             params['limit'] = limit
