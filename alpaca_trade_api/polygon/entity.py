@@ -329,16 +329,16 @@ trade_mapping = {
     "t": "timestamp"
 }
 
-quote_mapping = {
-    "T": "symbol",
-    "X": "askexchange",
-    "P": "askprice",
-    "S": "asksize",
-    "x": "bidexchange",
-    "p": "bidprice",
-    "s": "bidsize",
-    "c": "conditions",
-    "t": "timestamp"
+quote_mapping = {	
+    "sym": "symbol",	
+    "ax": "askexchange",	
+    "ap": "askprice",	
+    "as": "asksize",	
+    "bx": "bidexchange",	
+    "bp": "bidprice",	
+    "bs": "bidsize",	
+    "c": "condition",	
+    "t": "timestamp"	
 }
 
 agg_mapping = {
